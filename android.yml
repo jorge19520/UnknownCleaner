@@ -1,0 +1,37 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch: # Permite ejecutar la compilación manualmente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout del código
+      uses: actions/checkout@v4
+
+    - name: Configurar JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Compilar APK (Debug)
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.5'
+      env:
+        # Usamos 'gradle' directamente porque no generamos el archivo gradlew localmente
+        GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    
+    - name: Ejecutar build
+      run: gradle assembleDebug
+
+    - name: Subir APK generado
+      uses: actions/upload-artifact@v4
+      with:
+        name: UnknownCleaner-APK
+        path: app/build/outputs/apk/debug/app-debug.apk
